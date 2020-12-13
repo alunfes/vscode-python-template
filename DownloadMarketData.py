@@ -30,8 +30,8 @@ class DownloadMarketData:
 
       def __check_download_target_file(self):
             self.target_file = list(set(self.file_urls) - set(self.downloaded_file))
-            print('target files')
-            [print(f) for f in self.target_file]
+            print('target files=',len(self.target_file))
+            #[print(f) for f in self.target_file]
 
 
       def get_file_list(self):
@@ -43,6 +43,7 @@ class DownloadMarketData:
                   self.file_urls.append(a.get('href'))
                   self.num_files += 1
             return self.file_urls
+
 
       def download_file(self, file_url):
             file_name = os.path.basename(file_url)
@@ -74,6 +75,7 @@ class DownloadMarketData:
             self.__check_downloaded_file()
             ts, dt, size, price = [], [], [], []
             ohlcv_df = pd.DataFrame()
+            i = 0
             for d in self.downloaded_file:
                   df = pd.read_csv('./Data/'+d)
                   ts.extend(df['timestamp'])
@@ -81,6 +83,8 @@ class DownloadMarketData:
                         dt.append(datetime.datetime.fromtimestamp(timestamp_data))
                   size.extend(df['size'])
                   price.extend(df['price'])
+                  print('Converted file No.', i, ':', d)
+                  i += 1
             ohlcv_df = pd.DataFrame({'price':price, 'size':size}, index=dt)
             con_df = ohlcv_df['price'].resample('1T').ohlc()
             con_df = con_df.assign(size=ohlcv_df['size'].resample('1T').sum())
